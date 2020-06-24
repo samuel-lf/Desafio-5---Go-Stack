@@ -15,13 +15,17 @@ class CreateTransactionService {
   }
 
   public execute({title, value, type}: RequestDTO): Transaction {
-    const balance = this.transactionsRepository.getBalance();
+    if(!["income", "outcome"].includes(type)){
+      throw Error('O tipo da transação é inválido')
+    }
 
-    if(type === 'outcome' && balance.total < value){
+    const { total } = this.transactionsRepository.getBalance();
+
+    if(type === 'outcome' && total < value){
       throw Error('O valor de saída é maior que o valor total atual')
     }
 
-    const transaction = this.transactionsRepository.create(title, value, type);
+    const transaction = this.transactionsRepository.create({title, value, type});
     return transaction;
   }
 }
